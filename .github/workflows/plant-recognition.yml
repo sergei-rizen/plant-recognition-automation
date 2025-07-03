@@ -1,0 +1,27 @@
+name: Plant Image Recognition
+on:
+  repository_dispatch:
+    types: [process-plant-image]
+
+jobs:
+  recognize-plant:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests google-api-python-client pytesseract pillow
+      
+      - name: Process plant image
+        run: python process_plant.py
+        env:
+          GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
+          PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
+          IMAGE_ID: ${{ github.event.client_payload.image_id }}
