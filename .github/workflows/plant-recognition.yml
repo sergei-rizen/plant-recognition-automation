@@ -1,27 +1,50 @@
 name: Plant Image Recognition
+
 on:
+  workflow_dispatch:
+    inputs:
+      image_id:
+        description: 'Google Drive File ID'
+        required: true
+        type: string
+        default: '1YAp0DpTZxAbVfMzGf7qpVxBTYK7tud4D'
   repository_dispatch:
     types: [process-plant-image]
 
 jobs:
   recognize-plant:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
       
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
-          pip install requests google-api-python-client pytesseract pillow
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+      
+      - name: Install Python dependencies
+        run: |
+          pip install requests pytesseract pillow
       
       - name: Process plant image
         run: python process_plant.py
         env:
           GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
-          IMAGE_ID: ${{ github.event.client_payload.image_id }}
+          IMAGE_ID: ${{ inputs.image_id || github.event.client_payload.image_id }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: recognition-results
+          path: |
+            *.json
+            *.log
