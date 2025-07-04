@@ -7,7 +7,7 @@ on:
         description: 'Google Drive File ID'
         required: true
         type: string
-        default: '1YAp0DpTZxAbVfMzGf7qpVxBTYK7tud4D'
+        default: '1dyQwjV6YFu8sZGonSXCi4D04xGKHJIn7'
   repository_dispatch:
     types: [process-plant-image]
 
