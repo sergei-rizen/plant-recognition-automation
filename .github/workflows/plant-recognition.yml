@@ -7,7 +7,7 @@ on:
         description: 'Google Drive File ID'
         required: true
         type: string
-        default: '1YAp0DpTZxAbVfMzGf7qpVxBTYK7tud4D'
+        default: '1fPbln-MOrWn5Kcwp5z7ipOl-iim_dmeo'
 
 jobs:
   recognize-plant:
