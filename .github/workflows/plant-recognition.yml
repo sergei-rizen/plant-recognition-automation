@@ -7,9 +7,7 @@ on:
         description: 'Google Drive File ID'
         required: true
         type: string
-        default: '1dyQwjV6YFu8sZGonSXCi4D04xGKHJIn7'
-  repository_dispatch:
-    types: [process-plant-image]
+        default: '1YAp0DpTZxAbVfMzGf7qpVxBTYK7tud4D'
 
 jobs:
   recognize-plant:
@@ -24,21 +22,19 @@ jobs:
         with:
           python-version: '3.9'
       
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
-      
       - name: Install Python dependencies
         run: |
-          pip install requests pytesseract pillow
+          # We no longer need google-cloud-vision or pytesseract
+          pip install requests
       
       - name: Process plant image
         run: python process_plant.py
         env:
           GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
-          IMAGE_ID: ${{ inputs.image_id || github.event.client_payload.image_id }}
+          # Add the new API Key secret
+          GOOGLE_VISION_API_KEY: ${{ secrets.GOOGLE_VISION_API_KEY }}
+          IMAGE_ID: ${{ inputs.image_id }}
 
       - name: Upload results
         if: always()
@@ -46,6 +42,6 @@ jobs:
         with:
           name: recognition-results-${{ github.run_number }}
           path: |
-            *.json
-            *.log
-          retention-days: 30
+            result.json
+            result.log
+          retention-days: 7
