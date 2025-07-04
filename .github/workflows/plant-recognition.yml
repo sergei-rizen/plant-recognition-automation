@@ -7,11 +7,14 @@ on:
         description: 'Google Drive File ID'
         required: true
         type: string
-        default: '1fPbln-MOrWn5Kcwp5z7ipOl-iim_dmeo'
+        default: '1fPb1n-MOrWn5Kcwp5z7ipO1-iim_dmeo' # Your test "50" image ID
 
 jobs:
   recognize-plant:
     runs-on: ubuntu-latest
+    # This section declares the final output of the job
+    outputs:
+      result: ${{ steps.process_step.outputs.plant_result }}
     
     steps:
       - name: Checkout code
@@ -23,25 +26,14 @@ jobs:
           python-version: '3.9'
       
       - name: Install Python dependencies
-        run: |
-          # We no longer need google-cloud-vision or pytesseract
-          pip install requests
+        run: pip install requests
       
       - name: Process plant image
+        # Adding an ID to this step so we can reference its output
+        id: process_step
         run: python process_plant.py
         env:
           GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
-          # Add the new API Key secret
           GOOGLE_VISION_API_KEY: ${{ secrets.GOOGLE_VISION_API_KEY }}
           IMAGE_ID: ${{ inputs.image_id }}
-
-      - name: Upload results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: recognition-results-${{ github.run_number }}
-          path: |
-            result.json
-            result.log
-          retention-days: 7
