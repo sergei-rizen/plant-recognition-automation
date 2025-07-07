@@ -1,39 +1,41 @@
 name: Plant Image Recognition
 
+# This trigger listens for an API request (a dispatch event)
+# sent from a source like your Make.com scenario.
 on:
-  workflow_dispatch:
-    inputs:
-      image_id:
-        description: 'Google Drive File ID'
-        required: true
-        type: string
-        default: '1fPbln-MOrWn5Kcwp5z7ipOl-iim_dmeo' # Your test "50" image ID
+  repository_dispatch:
+    types: [coda_process_plant]
 
 jobs:
   recognize-plant:
     runs-on: ubuntu-latest
-    # This section declares the final output of the job
-    outputs:
-      result: ${{ steps.process_step.outputs.plant_result }}
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      
+
       - name: Install Python dependencies
         run: pip install requests
-      
-      - name: Process plant image
-        # Adding an ID to this step so we can reference its output
-        id: process_step
+
+      - name: Process plant image and Update Coda
         run: python process_plant.py
         env:
+          # Google Drive and Vision API Keys
           GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
-          PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
           GOOGLE_VISION_API_KEY: ${{ secrets.GOOGLE_VISION_API_KEY }}
-          IMAGE_ID: ${{ inputs.image_id }}
+          
+          # PlantNet API Key
+          PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
+          
+          # Coda API Credentials
+          CODA_API_TOKEN: ${{ secrets.CODA_API_TOKEN }}
+          CODA_DOC_ID: ${{ secrets.CODA_DOC_ID }}
+          CODA_TABLE_ID: ${{ secrets.CODA_TABLE_ID }}
+          
+          # Inputs from the Make.com webhook payload
+          IMAGE_ID: ${{ github.event.client_payload.image_id }}
+          ROW_ID: ${{ github.event.client_payload.row_id }}
