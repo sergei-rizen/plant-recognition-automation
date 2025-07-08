@@ -1,7 +1,5 @@
 name: Plant Image Recognition
 
-# This trigger listens for an API request (a dispatch event)
-# sent from a source like your Make.com scenario.
 on:
   repository_dispatch:
     types: [coda_process_plant]
@@ -10,32 +8,25 @@ jobs:
   recognize-plant:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-
       - name: Install Python dependencies
-        run: pip install requests
-
+        run: pip install requests google-generativeai # <-- Updated libraries
+      
       - name: Process plant image and Update Coda
         run: python process_plant.py
         env:
-          # Google Drive and Vision API Keys
           GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
           GOOGLE_VISION_API_KEY: ${{ secrets.GOOGLE_VISION_API_KEY }}
-          
-          # PlantNet API Key
           PLANTNET_API_KEY: ${{ secrets.PLANTNET_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # <-- New secret
           
-          # Coda API Credentials
           CODA_API_TOKEN: ${{ secrets.CODA_API_TOKEN }}
           CODA_DOC_ID: ${{ secrets.CODA_DOC_ID }}
           CODA_TABLE_ID: ${{ secrets.CODA_TABLE_ID }}
-          
-          # Inputs from the Make.com webhook payload
+
           IMAGE_ID: ${{ github.event.client_payload.image_id }}
           ROW_ID: ${{ github.event.client_payload.row_id }}
+          IMAGE_NAME: ${{ github.event.client_payload.image_name }}
