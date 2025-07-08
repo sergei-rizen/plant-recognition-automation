@@ -80,7 +80,6 @@ def get_name_from_text_hint(text_hint):
     """Uses Gemini to correct a plant name hint."""
     print(f"Asking Gemini (Text) to correct hint: '{text_hint}'")
     genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-    # Using the correct model name from your list
     model = genai.GenerativeModel('gemini-1.5-flash-latest')
     prompt = f"""Analyze the following text, which is supposed to be a plant name: \"{text_hint}\". It might be a common name, a misspelled Latin name, or a partial name. Respond with only the full, corrected scientific name for this plant. If you cannot determine a name with high confidence, respond with the single word: 'Unknown'."""
     try:
@@ -95,8 +94,8 @@ def get_name_from_image(image_data):
     """Uses Gemini Vision as a last resort to identify the plant from the image."""
     print("All other methods failed. Asking Gemini (Vision) to identify plant from image.")
     genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-    # This model name is correct and stable
-    model = genai.GenerativeModel('gemini-pro-vision')
+    # Updated to the new, recommended multimodal model
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
     image_part = {"mime_type": "image/jpeg", "data": base64.b64encode(image_data)}
     prompt = "Identify the plant in this image. Respond with only its scientific name."
     try:
